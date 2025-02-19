@@ -76,7 +76,9 @@ return [
      * ],
      * ```
      */
-    'servers' => null,
+    'servers' => [
+        'Production' => 'https://retotecnicoidbi-production.up.railway.app/api',
+    ],
 
     'middleware' => [
         'web',
