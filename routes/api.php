@@ -23,6 +23,8 @@ Route::middleware('auth:api')->group(function () {
 
     Route::get('/sales', [SaleController::class, 'index']); // Lista las ventas
     Route::post('/sales', [SaleController::class, 'store']); // Registra una nueva venta
+
+    Route::get('/sales/report', [SaleController::class, 'generateReport'])->middleware('role:admin');
 });
 
 

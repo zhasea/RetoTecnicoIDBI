@@ -1,10 +1,13 @@
 <?php
 
-namespace App\Services;
+namespace App\Http\Services;
 
-use App\Repositories\SaleRepository;
+use App\Http\Repositories\SaleRepository;
 use Illuminate\Support\Facades\DB;
 use Exception;
+use Maatwebsite\Excel\Facades\Excel;
+use App\Exports\SalesReportExport;
+use Illuminate\Support\Facades\Storage;
 
 class SaleService
 {
@@ -25,18 +28,14 @@ class SaleService
         DB::beginTransaction();
 
         try {
-            // Buscar o crear cliente
             $customer = $this->saleRepository->findOrCreateCustomer($data['customer']);
 
-            // Crear la venta
             $sale = $this->saleRepository->createSale([
                 'customer_id' => $customer->id
             ]);
 
-            // Procesar productos vendidos
             $total_amount = $this->saleRepository->processSaleItems($sale, $data['products']);
 
-            // Actualizar monto total de la venta
             $sale->update(['total_amount' => $total_amount]);
 
             DB::commit();
@@ -46,5 +45,22 @@ class SaleService
             DB::rollBack();
             throw new Exception($e->getMessage(), 400);
         }
+    }
+
+    public function getSalesReport($from = null, $to = null)
+    {
+        return $this->saleRepository->getSalesReport($from, $to);
+    }
+
+    public function exportSalesToXlsx($from = null, $to = null)
+    {
+        $fileName = 'sales_report_' . now()->format('Ymd_His') . '.xlsx';
+        $filePath = 'public/reports/' . $fileName;
+
+        Excel::store(new SalesReportExport($this->getSalesReport($from, $to)), $filePath);
+
+        $downloadUrl = Storage::url('reports/' . $fileName);
+
+        return $downloadUrl;
     }
 }

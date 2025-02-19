@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Repositories;
+namespace App\Http\Repositories;
 
 use App\Models\Sale;
 use App\Models\SaleItem;
@@ -70,4 +70,24 @@ class SaleRepository
 
         return $total_amount;
     }
+
+    public function getSalesReport($from = null, $to = null)
+    {
+        $query = Sale::with(['customer'])
+            ->when($from, fn($query) => $query->whereDate('sale_date', '>=', $from))
+            ->when($to, fn($query) => $query->whereDate('sale_date', '<=', $to));
+
+        return $query->get()->map(function ($sale) {
+            return [
+                'code' => $sale->code,
+                'customer_name' => $sale->customer->name,
+                'customer_id' => $sale->customer->id_number,
+                'customer_email' => $sale->customer->email ?? '',
+                'total_products' => $sale->saleItems->sum('quantity'),
+                'total_amount' => $sale->total_amount,
+                'sale_date' => \Carbon\Carbon::parse($sale->sale_date)->format('Y-m-d H:i A'),
+            ];
+        });
+    }
+
 }
