@@ -44,17 +44,21 @@
 6.- Ejecucion de los seeders
 ```bash
     php artisan db:seed
-    php artisan storage:link
 ```  
 7.- Acceso directo
 ```bash
     php artisan storage:link
 ```  
-8.- Ejecucion del servidor en desarrollo
+8.- Generacion del key de JWT
+```bash
+    php artisan jwt:secret
+```  
+9.- Ejecucion del servidor en desarrollo
 ```bash
     php artisan serve
 ```  
 Esto iniciará el servidor en http://localhost:8000 o el puerto que se indique en la terminal.
+De tener problemas puede guiarse de las variables de .env.example
 
 
 
