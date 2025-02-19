@@ -16,13 +16,13 @@ Route::middleware('auth:api')->group(function () {
     Route::post('logout', [AuthController::class, 'logout']);
     Route::post('refresh', [AuthController::class, 'refresh']);
 
-    Route::get('/products', [ProductController::class, 'index']); 
+    Route::get('/products', [ProductController::class, 'index'])->middleware('role:vendedor,admin'); 
     Route::post('/products', [ProductController::class, 'store'])->middleware('role:vendedor,admin'); 
     Route::put('/products/{id}', [ProductController::class, 'update'])->middleware('role:vendedor,admin'); 
     Route::delete('/products/{id}', [ProductController::class, 'destroy'])->middleware('role:admin'); 
 
-    Route::get('/sales', [SaleController::class, 'index']); // Lista las ventas
-    Route::post('/sales', [SaleController::class, 'store']); // Registra una nueva venta
+    Route::get('/sales', [SaleController::class, 'index'])->middleware('role:vendedor,admin'); // Lista las ventas
+    Route::post('/sales', [SaleController::class, 'store'])->middleware('role:vendedor,admin'); // Registra una nueva venta
 
     Route::get('/sales/report', [SaleController::class, 'generateReport'])->middleware('role:admin');
 });

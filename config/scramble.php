@@ -77,7 +77,7 @@ return [
      * ```
      */
     'servers' => [
-        'Production' => 'https://retotecnicoidbi-production.up.railway.app/api',
+    'Production' => env('APP_URL_PUERTO', 'http://localhost') . '/api',
     ],
 
     'middleware' => [

@@ -16,18 +16,26 @@ class SaleController extends Controller
     {
         $this->saleService = $saleService;
     }
-
+    /**
+     * Listar las ventas
+     */
     public function index(): JsonResponse
     {
         return response()->json($this->saleService->getAllSales());
     }
 
+     /**
+     * Realizar una venta
+     */
     public function store(StoreSaleRequest $request): JsonResponse
     {
         $sale = $this->saleService->createSale($request->validated());
         return response()->json(['message' => 'Venta registrada con éxito.', 'sale' => $sale], 201);
     }
 
+     /**
+     * Generacion de un reporte
+     */
     public function generateReport(Request $request): JsonResponse
     {
         $from = $request->query('from');

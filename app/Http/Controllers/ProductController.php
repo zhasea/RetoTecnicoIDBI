@@ -15,17 +15,25 @@ class ProductController extends Controller
     {
         $this->productService = $productService;
     }
-
+     /**
+     * Listar Productos
+     */
     public function index()
     {
         return response()->json($this->productService->getAllProducts(), 200);
     }
 
+     /**
+     * Listar un Producto
+     */
     public function show(string $id)
     {
         return response()->json($this->productService->getProductById($id), 200);
     }
 
+     /**
+     * Registro de un producto
+     */
     public function store(StoreProductRequest $request)
     {
         $product = $this->productService->createProduct($request->validated());
@@ -33,6 +41,9 @@ class ProductController extends Controller
         return response()->json($product, 201);
     }
 
+     /**
+     * Actualizacion de un producto
+     */
     public function update(UpdateProductRequest $request, string $id)
     {
         $product = $this->productService->updateProduct($id, $request->validated());
@@ -40,6 +51,9 @@ class ProductController extends Controller
         return response()->json($product, 200);
     }
 
+     /**
+     * Eliminacion de un producto
+     */
     public function destroy(string $id)
     {
         $this->productService->deleteProduct($id);

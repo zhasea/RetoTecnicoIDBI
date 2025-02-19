@@ -5,8 +5,6 @@ namespace App\Http\Services;
 use App\Http\Repositories\UserRepository;
 use PHPOpenSourceSaver\JWTAuth\Facades\JWTAuth;
 use App\Exceptions\AuthException;
-use App\Exceptions\ValidationException;
-use Validator;
 
 class AuthService
 {
@@ -19,18 +17,6 @@ class AuthService
 
     public function register(array $data)
     {
-        $validator = Validator::make($data, [
-            'name' => 'required|string|max:255',
-            'surname' => 'required|string|max:255',
-            'email' => 'required|string|email|max:255|unique:users',
-            'password' => 'required|string|min:8|confirmed',
-            'role_id' => 'required|exists:roles,id',
-        ]);
-
-        if ($validator->fails()) {
-            throw new ValidationException(json_encode($validator->errors()));
-        }
-
         $user = $this->userRepository->createUser($data);
         $token = JWTAuth::fromUser($user);
 
@@ -57,8 +43,10 @@ class AuthService
 
     public function refresh()
     {
-        return ['token' => JWTAuth::refresh()];
+        $token = JWTAuth::getToken();
+        return ['token' => JWTAuth::refresh($token)];
     }
+
 
     public function logout()
     {
