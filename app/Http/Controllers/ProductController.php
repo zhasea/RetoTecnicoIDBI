@@ -3,106 +3,46 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use App\Models\Product;
-use Validator;
-use Illuminate\Validation\Rule;
+use App\Http\Services\ProductService;
+use App\Http\Requests\UpdateProductRequest;
+use App\Http\Requests\StoreProductRequest;
 
 class ProductController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
-    public function index()
+    protected $productService;
+
+    public function __construct(ProductService $productService)
     {
-        //
-        return response() -> json(Product::all(),200);
+        $this->productService = $productService;
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(Request $request)
+    public function index()
     {
-        //
-        $validator = Validator::make($request->all(), [
-            'sku' => 'required|string|max:255|unique:products',
-            'name' => 'required|string|max:255',
-            'unique_price' => 'required|numeric|min:0',
-            'stock' => 'required|integer|min:0',
-        ]);
+        return response()->json($this->productService->getAllProducts(), 200);
+    }
 
-        if ($validator->fails()) {
-            return response()->json(['errors' => $validator->errors()], 422);
-        }
+    public function show(string $id)
+    {
+        return response()->json($this->productService->getProductById($id), 200);
+    }
 
-        $product = Product::create($request->all());
+    public function store(StoreProductRequest $request)
+    {
+        $product = $this->productService->createProduct($request->validated());
 
         return response()->json($product, 201);
     }
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(string $id)
+    public function update(UpdateProductRequest $request, string $id)
     {
-        //
-        $product = Product::find($id);
-
-        if (!$product) {
-            return response()->json(['error' => 'Producto no encontrado'], 404);
-        }
+        $product = $this->productService->updateProduct($id, $request->validated());
 
         return response()->json($product, 200);
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, string $id)
-    {
-        //
-        $product = Product::find($id);
-
-        if (!$product) {
-            return response()->json(['error' => 'Producto no encontrado'], 404);
-        }
-
-        $validator = Validator::make($request->all(), [
-            'sku' => [
-                'nullable',
-                'string',
-                'max:255',
-                Rule::unique('products', 'sku')->ignore($id), 
-            ],
-            'name' => 'nullable|string|max:255',
-            'unique_price' => 'nullable|numeric|min:0',
-            'stock' => 'nullable|integer|min:0',
-        ]);
-
-
-        if ($validator->fails()) {
-            return response()->json(['errors' => $validator->errors()], 422);
-        }
-        
-        $product->update($request->all());
-        
-        return response()->json($product, 200);
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     */
     public function destroy(string $id)
     {
-        //
-        $product = Product::find($id);
-
-        if (!$product) {
-            return response()->json(['error' => 'Producto no encontrado'], 404);
-        }
-
-        $product->delete();
-
+        $this->productService->deleteProduct($id);
         return response()->json(['message' => 'Producto eliminado correctamente'], 200);
     }
 }
