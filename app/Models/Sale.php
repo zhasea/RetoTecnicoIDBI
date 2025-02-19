@@ -1,28 +1,37 @@
 <?php
 
 namespace App\Models;
+
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class Sale extends Model
 {
-    //
     use HasFactory;
     
     protected $fillable = [
-        'code', 'document_type_id', 'seller_id', 'total_amount', 'sale_date'
+        'code', 'customer_id', 'seller_id', 'total_amount', 'sale_date'
     ];
 
-    public function documentType()
+    /**
+     * Relación con el cliente.
+     */
+    public function customer()
     {
-        return $this -> belongsTo(DocumentType::class);
+        return $this->belongsTo(Customer::class);
     }
 
-     public function seller()
+    /**
+     * Relación con el usuario vendedor.
+     */
+    public function seller()
     {
         return $this->belongsTo(User::class, 'seller_id');
     }
 
+    /**
+     * Relación con los detalles de venta.
+     */
     public function saleDetails()
     {
         return $this->hasMany(SaleDetail::class);
