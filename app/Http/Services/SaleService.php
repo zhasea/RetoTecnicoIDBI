@@ -55,11 +55,11 @@ class SaleService
     public function exportSalesToXlsx($from = null, $to = null)
     {
         $fileName = 'sales_report_' . now()->format('Ymd_His') . '.xlsx';
-        $filePath = 'public/reports/' . $fileName;
+        $filePath = 'reports/' . $fileName;
 
-        Excel::store(new SalesReportExport($this->getSalesReport($from, $to)), $filePath);
+        Storage::disk('public')->put($filePath, Excel::raw(new SalesReportExport($this->getSalesReport($from, $to)), \Maatwebsite\Excel\Excel::XLSX));
 
-        $downloadUrl = Storage::url('reports/' . $fileName);
+        $downloadUrl = Storage::disk('public')->url('reports/' . $fileName);
 
         return $downloadUrl;
     }
