@@ -2,100 +2,51 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\User;
+use App\Http\Services\AuthService;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Hash;
-use PHPOpenSourceSaver\JWTAuth\Facades\JWTAuth;
-use PHPOpenSourceSaver\JWTAuth\Exceptions\JWTException;
-use Validator;
+
 class AuthController extends Controller
 {
-    
-    
+    protected $authService;
+
+    public function __construct(AuthService $authService)
+    {
+        $this->authService = $authService;
+    }
+
     public function register(Request $request)
     {
-        $request->headers->set('Accept', 'application/json');
-
-        $validator = Validator::make($request->all(), [
-            'name' => 'required|string|max:255',
-            'surname' => 'required|string|max:255',
-            'email' => 'required|string|email|max:255|unique:users',
-            'password' => 'required|string|min:8|confirmed',
-            'role_id' => 'required|exists:roles,id',
-        ]);
-        if ($validator->fails()) {
-            return response()->json(['errors' => $validator->errors()], 422);
-        }
-        $user = User::create([
-            'name' => $request->name,
-            'surname' => $request->surname,
-            'email' => $request->email,
-            'password' => Hash::make($request->password),
-            'role_id' => $request->role_id,
-        ]);
-
-        $token = JWTAuth::fromUser($user);
-
+        $response = $this->authService->register($request->all());
         return response()->json([
             'message' => 'Usuario registrado exitosamente',
-            'user' => $user,
-            'token' => $token,
+            'user' => $response['user'],
+            'token' => $response['token']
         ], 201);
     }
 
-    
     public function login(Request $request)
     {
-        $validator = Validator::make($request->all(), [
-            'email' => 'required|string|email',
-            'password' => 'required|string',
-        ]);
-        if ($validator->fails()) {
-            return response()->json(['errors' => $validator->errors()], 422);
-        }
-        $credentials = request(['email', 'password']);
-        try {
-            if (!$token = JWTAuth::attempt($credentials)) {
-                return response()->json(['error' => 'Credenciales inválidas'], 401);
-            }
-        } catch (JWTException $e) {
-            return response()->json(['error' => 'No se pudo crear el token'], 500);
-        }
-
+        $response = $this->authService->login($request->only(['email', 'password']));
         return response()->json([
             'message' => 'Inicio de sesión exitoso',
-            'token' => $token,
-            'expires_in' => auth('api')->factory()->getTTL() * 60,
-            "user" => [
-                "name" => auth()->user()->name,
-                "email" => auth()->user()->email
-            ]
+            'token' => $response['token'],
+            'expires_in' => $response['expires_in'],
+            'user' => $response['user']
         ]);
     }
 
-    
     public function profile()
     {
-        return response()->json([
-            'user' => auth('api')->user()->load('role'),
-        ]);
+        return response()->json($this->authService->profile());
     }
-
 
     public function refresh()
     {
-        return response()->json([
-            'token' => JWTAuth::refresh(),
-        ]);
+        return response()->json($this->authService->refresh());
     }
 
-    
     public function logout()
     {
-        JWTAuth::invalidate(JWTAuth::getToken());
-
-        return response()->json([
-            'message' => 'Cierre de sesión exitoso',
-        ]);
+        return response()->json($this->authService->logout());
     }
 }
