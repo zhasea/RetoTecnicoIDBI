@@ -8,7 +8,7 @@ class Product extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['sku', 'name', 'unit_price', 'stock'];
+    protected $fillable = ['sku', 'name', 'unique_price', 'stock'];
 
     public function saleDetails()
     {
